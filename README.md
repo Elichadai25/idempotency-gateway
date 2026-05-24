@@ -318,6 +318,6 @@ src/
 │       └── GlobalExceptionHandler.java      # Maps exceptions → HTTP responses
 └── test/java/com/igirepay/gateway/
 └── PaymentControllerIntegrationTest.java # Full integration tests
-
+||
 ---
 
