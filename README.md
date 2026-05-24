@@ -3,10 +3,11 @@
 A production-grade idempotency layer for **IgirePay Technologies Ltd.**, built with **Java 17** and **Spring Boot 3**.  
 Ensures every payment is processed **exactly once**, no matter how many times a client retries.
 
-
+---
 
 ## Architecture Diagram
 
+```
 
 Client (e-commerce shop)
         │
@@ -56,11 +57,11 @@ Client (e-commerce shop)
                    ▼                        ▼
            201 Created               201 Created
            (fresh)                   X-Cache-Hit: true
-
+```
 
 ### Sequence Diagram – Concurrent Duplicate Requests (Bonus)
 
-
+```
 Client A ──POST /process-payment──────────────────────────────────────▶ Server
                                   [creates IN_FLIGHT record]
                                   [starts 2s processing]
@@ -79,8 +80,9 @@ Client B  ◀────────────────────── 
                                   [woke up, returned cached result]
 
 
+```
 
-
+---
 ## Setup Instructions
 
 ### Prerequisites
@@ -99,7 +101,7 @@ cd idempotency-gateway
 
 # Build and start
 mvn spring-boot:run
-
+```
 
 The server starts on **http://localhost:8080**.
 
@@ -107,10 +109,11 @@ The server starts on **http://localhost:8080**.
 
 ```bash
 mvn test
-
+```
 
 > **Note:** The integration tests include the 2-second processing delay; expect the test suite to take ~20 seconds.
 
+---
 
 
 ## API Documentation
@@ -134,7 +137,7 @@ Processes a payment request. Idempotent – safe to retry with the same key.
   "currency": "RWF"
 }
 
-
+```
 | Field      | Type   | Constraints             |
 |------------|--------|-------------------------|
 | `amount`   | number | Required, > 0           |
@@ -159,7 +162,7 @@ curl -X POST http://localhost:8080/process-payment \
   -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \
   -d '{"amount": 100, "currency": "RWF"}'
 
-
+```
 ```json
 HTTP/1.1 201 Created
 
@@ -170,7 +173,7 @@ HTTP/1.1 201 Created
   "processedAt": "2026-05-22T10:00:00Z"
 }
 
-
+```
 #### Example – Duplicate Request (same key & body)
 
 ```bash
@@ -179,7 +182,7 @@ curl -X POST http://localhost:8080/process-payment \
   -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \
   -d '{"amount": 100, "currency": "RWF"}'
 
-
+```
 ```json
 HTTP/1.1 201 Created
 X-Cache-Hit: true
@@ -191,7 +194,7 @@ X-Cache-Hit: true
   "processedAt": "2026-05-22T10:00:00Z"
 }
 
-
+```
 #### Example – Conflict (different body)
 
 ```bash
@@ -200,7 +203,7 @@ curl -X POST http://localhost:8080/process-payment \
   -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \
   -d '{"amount": 500, "currency": "RWF"}'
 
-
+```
 ```json
 HTTP/1.1 409 Conflict
 
@@ -210,8 +213,8 @@ HTTP/1.1 409 Conflict
   "message": "Idempotency key already used for a different request body.",
   "timestamp": "2026-05-22T10:00:05Z"
 }
-
-
+```
+```
 
 
 ### `GET /admin/audit-log`
@@ -220,7 +223,7 @@ Returns every payment attempt ever recorded (Developer's Choice feature).
 
 ```bash
 curl http://localhost:8080/admin/audit-log
-
+```
 
 ```json
 [
@@ -240,7 +243,7 @@ curl http://localhost:8080/admin/audit-log
   }
 ]
 
-
+```
 ### `GET /admin/stats`
 
 Returns a quick summary of current system state.
@@ -249,7 +252,7 @@ Returns a quick summary of current system state.
 
 Spring Boot health check endpoint.
 
-
+---
 
 ## Design Decisions
 
@@ -269,7 +272,7 @@ Rather than hashing the raw JSON string (which would break on key reordering), e
 
 The spec allows any store. Using a `ConcurrentHashMap` keeps the project self-contained — no Redis or database setup needed to run it. In production, the `IdempotencyStore` interface would be backed by Redis with a TTL.
 
-
+---
 
 ## Developer's Choice Feature: Idempotency Key TTL + Audit Log
 
@@ -290,11 +293,11 @@ Payment processors like Stripe and PayPal expire idempotency keys after 24 hours
 **Audit Log:**  
 Financial regulators (BNR in Rwanda, PCI-DSS globally) require an immutable audit trail of every payment attempt. The log answers: *"Did we charge this customer? When? Was it a retry?"* This is essential for dispute resolution and compliance. In production this would be written to an append-only database table or event stream.
 
-
+---
 
 ## Project Structure
 
-
+---
 src/
 ├── main/java/com/igirepay/gateway/
 │   ├── IdempotencyGatewayApplication.java   # Entry point
