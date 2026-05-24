@@ -296,7 +296,8 @@ Financial regulators (BNR in Rwanda, PCI-DSS globally) require an immutable audi
 ---
 
 ## Project Structure
----
+
+```
 src/
 ├── main/java/com/igirepay/gateway/
 │   ├── IdempotencyGatewayApplication.java   # Entry point
@@ -317,8 +318,6 @@ src/
 │       ├── InFlightTimeoutException.java
 │       └── GlobalExceptionHandler.java      # Maps exceptions → HTTP responses
 └── test/java/com/igirepay/gateway/
-└── PaymentControllerIntegrationTest.java # Full integration tests
-
-||
----
+    └── PaymentControllerIntegrationTest.java # Full integration tests
+```
 
